@@ -1,0 +1,121 @@
+﻿# NovaMart - Full-Stack AI-Powered E-Commerce Platform
+
+A production-grade, full-stack E-Commerce Web Application developed in **Python (Flask)** with a **Relational Database (SQLite)** and an **AI/Machine Learning Product Recommendation Engine (Scikit-Learn & Pandas)**.
+
+---
+
+## 🚀 Key Features & Highlights
+
+### 1. 🛍️ Customer Experience & Product Catalog
+- **Interactive Homepage**: Hero banner, category navigation cards, AI "Recommended for You" carousel, and featured products.
+- **Dynamic Search & Multi-Filters**: Instant keyword search, category filtering, live price slider range, and sorting (*Featured, Price: Low to High, Price: High to Low, Newest*).
+- **Rich Product Detail Pages**: Product image showcase, stock availability badges, discount calculations, customer reviews, and star ratings.
+- **Customer Reviews**: Logged-in users can rate products (1 to 5 stars) and write textual reviews which dynamically update the product average rating.
+
+### 2. 🧠 AI & Machine Learning Recommendation Engine
+- **Content-Based Filtering (TF-IDF & Cosine Similarity)**: Analyzes product descriptions, categories, and titles using `scikit-learn`'s `TfidfVectorizer` and computes pairwise cosine similarity to recommend "Similar Products You May Like".
+- **Collaborative Association Engine**: Mines customer order history across `order_items` to identify co-purchase patterns and powers the "Frequently Bought Together" widget.
+- **Personalized Recommendations**: Dynamic homepage suggestions tailored to user purchase and cart browsing history.
+
+### 3. 🛒 Cart & ACID-Compliant Checkout
+- **Smart Shopping Cart**: Supports both guest sessions and database-backed persistent user carts. Instant quantity increment/decrement and item removal.
+- **ACID Transaction Management**: Multi-step checkout execution:
+  1. Checks stock availability.
+  2. Deducts product stock in real time.
+  3. Inserts master record into `orders`.
+  4. Inserts all line items into `order_items`.
+  5. Clears user cart.
+  *All wrapped within an atomic `BEGIN TRANSACTION` &rarr; `COMMIT` / `ROLLBACK` block to ensure zero data corruption.*
+- **Multiple Payment Simulation**: UPI (Google Pay, PhonePe, Paytm, QR), Credit/Debit Card, and Cash on Delivery (COD).
+- **Printable Invoices & Receipts**: Formatted order summary receipt with printable invoice format and unique order tracking IDs (`ORD-YYYYMMDD-XXXX`).
+
+### 4. 🛡️ Role-Based Authentication & User Profiles
+- Secure user registration and login with salted password hashing using `werkzeug.security`.
+- Session-based authorization (`@login_required`, `@admin_required`).
+- User profile management (update contact info and default shipping address).
+- Customer order history tracking with live order status indicators.
+
+### 5. ⚙️ Admin Management Portal
+- **KPI Metrics Dashboard**: Live analytics showing Total Revenue (₹), Total Orders, Catalog Products, Registered Users, and Low-Stock Alerts.
+- **Product & Inventory Management**: Complete CRUD interface to Add, Edit, and Delete products, with automatic retraining/refitting of the AI recommendation vectors.
+- **Order Management**: Inspect customer shipping details and update order lifecycle status (*Processing &rarr; Shipped &rarr; Delivered &rarr; Cancelled*).
+- **User Management**: View registered customer profiles and account creation timestamps.
+
+---
+
+## 🗄️ Database Architecture & ER Design
+
+### Relational Schema (SQLite):
+1. **`users`** (`id`, `name`, `email`, `password_hash`, `phone`, `address`, `role`, `created_at`)
+2. **`categories`** (`id`, `name`, `slug`, `icon`, `description`)
+3. **`products`** (`id`, `category_id`, `name`, `slug`, `description`, `price`, `discount_price`, `stock`, `image_url`, `rating`, `is_featured`, `created_at`)
+4. **`cart_items`** (`id`, `user_id`, `product_id`, `quantity`, `created_at`)
+5. **`orders`** (`id`, `order_number`, `user_id`, `total_amount`, `discount_amount`, `shipping_fee`, `final_amount`, `shipping_name`, `shipping_email`, `shipping_phone`, `shipping_address`, `payment_method`, `payment_status`, `order_status`, `created_at`)
+6. **`order_items`** (`id`, `order_id`, `product_id`, `product_name`, `unit_price`, `quantity`, `subtotal`)
+7. **`reviews`** (`id`, `product_id`, `user_id`, `rating`, `comment`, `created_at`)
+
+---
+
+## 🔑 Demo Login Accounts
+
+| Role | Email | Password | Access Level |
+| :--- | :--- | :--- | :--- |
+| **Administrator** | `admin@ecommerce.com` | `admin123` | Full Admin Dashboard & Inventory Management |
+| **Customer** | `john@example.com` | `john123` | Shopping, Cart, Orders, Reviews |
+| **Customer 2** | `priya@example.com` | `priya123` | Shopping, Cart, Orders, Reviews |
+
+*(Quick Auto-Fill buttons are also provided directly on the Login page for one-click testing during demonstrations).*
+
+---
+
+## 💻 How to Run the Application
+
+### 1. Run the Flask Server:
+```bash
+python app.py
+```
+
+### 2. Open in your Browser:
+Navigate to **`http://127.0.0.1:5000`**
+
+### 3. Run Automated Unit & Integration Tests:
+```bash
+python test_app.py
+```
+
+---
+
+## 📁 Project Structure
+
+```
+PROJECT'S/
+├── app.py                      # Main Flask application with routing & authentication
+├── database.py                 # SQLite database schema, initialization & seed data
+├── models.py                   # Data queries, cart management & ACID checkout transaction
+├── recommender.py              # AI/ML Recommendation Engine (TF-IDF & Co-purchases)
+├── test_app.py                 # Automated test suite (5 comprehensive unit/integration tests)
+├── requirements.txt            # Project dependencies
+├── static/
+│   ├── css/
+│   │   └── style.css           # Modern custom styling, responsive cards, glassmorphism & badges
+│   └── js/
+│       └── main.js             # Interactive cart quantity controls & alert management
+└── templates/
+    ├── base.html               # Master layout with Navbar, Category bar, Cart badge & Footer
+    ├── index.html              # Homepage with hero slider, category tiles & AI picks
+    ├── products.html           # Catalog page with search, category filtering & price range
+    ├── product_detail.html     # Product details, reviews submission & ML recommendations
+    ├── cart.html               # Shopping cart with dynamic quantity change & item removal
+    ├── checkout.html           # Checkout form & payment simulation
+    ├── order_success.html      # Order confirmation receipt with invoice details & tracking
+    ├── orders.html             # User order history
+    ├── login.html              # Modern User login page with quick demo autofill buttons
+    ├── register.html           # User registration page
+    ├── profile.html            # User profile management
+    └── admin/
+        ├── dashboard.html      # Admin KPI analytics & stock alerts
+        ├── products.html       # Admin inventory & product management table
+        ├── product_form.html   # Add/Edit product form
+        ├── orders.html         # Admin order status management
+        └── users.html          # Admin registered users list
+```
